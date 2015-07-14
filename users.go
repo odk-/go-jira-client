@@ -279,3 +279,18 @@ func (j *Jira) AddUser(username string, fullname string, email string) error {
 	j.buildAndExecRequest("POST", url, data)
 	return nil
 }
+
+/*
+removes user from group.
+	DELETE /rest/api/2/group/user?groupname=NAME&username=NAME
+
+Parameters
+	group name
+	user name
+
+*/
+func (j *Jira) DelUserFromGroup(groupname string, username string) error {
+	url := j.BaseUrl + j.ApiPath + grp_url + "/user?groupname=" + groupname + "&username=" + username
+	j.buildAndExecRequest("DELETE", url, nil)
+	return nil
+}
