@@ -33,6 +33,7 @@ type User struct {
 	AvatarUrls   map[string]string `json:"avatarUrls"`
 	Expand       string            `json:"expand"`
 	Groups       *Groups           `json:"groups"`
+	Errors       []string          `json:"errorMessages"`
 	// "groups": {
 	//     "size": 3,
 	//     "items": [
@@ -108,13 +109,14 @@ Usage
 func (j *Jira) UserExt(username string) (*User, error) {
 	url := j.BaseUrl + j.ApiPath + user_url + "?username=" + username + "&expand=groups"
 	contents := j.buildAndExecRequest("GET", url, nil)
-
 	user := new(User)
 	err := json.Unmarshal(contents, &user)
 	if err != nil {
-		fmt.Println("%s", err)
+		return nil, err
 	}
-
+	if user.Self == "" {
+		return nil, fmt.Errorf("User not found.")
+	}
 	return user, err
 }
 
