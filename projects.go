@@ -2,10 +2,8 @@ package gojira
 
 import (
 	"encoding/json"
-	//	"encoding/xml"
 	"fmt"
-	//	"net/url"
-	//	"time"
+	"regexp"
 )
 
 const (
@@ -61,4 +59,32 @@ func (j *Jira) GetProjectRoles(key string) ([]*ProjectRoles, error) {
 	}
 
 	return prRoles, err
+}
+
+/*
+Search for project. Gets list of all projects available to user and display those with name matching
+regexp .*searchString.* match is case insensitive.
+
+    GET <jira_url>/rest/api/2/project
+
+Params
+	searchString string
+*/
+func (j *Jira) SearchProjects(searchString string) (*[]JiraProject, error) {
+	url := j.BaseUrl + j.ApiPath + project_url
+	contents := j.buildAndExecRequest("GET", url, nil)
+
+	projects := new([]JiraProject)
+	err := json.Unmarshal(contents, &projects)
+	if err != nil {
+		fmt.Printf("%s", err)
+	}
+	searchResult := new([]JiraProject)
+	var rgx = regexp.MustCompile(fmt.Sprintf("(?i).*%s.*", searchString))
+	for _, project := range *projects {
+		if rgx.MatchString(project.Name) {
+			*searchResult = append(*searchResult, project)
+		}
+	}
+	return searchResult, nil
 }
